@@ -51,20 +51,23 @@ public class MeteoGenieBot extends TelegramLongPollingBot {
             }
         }
 
-        Command nextCommand = commandFlowService.nextStep(chatId, update);
-        if (nextCommand != null) {
-            CommandHandler nextHandler = handlerFactory.getHandler(nextCommand);
-            if (nextHandler != null) {
-                SendMessage nextMessages = nextHandler.handle(chatId, update);
-                if (nextMessages != null) {
+        if (command == Command.START){
+            Command nextCommand = commandFlowService.nextStep(chatId, update);
+            if (nextCommand != null) {
+                CommandHandler nextHandler = handlerFactory.getHandler(nextCommand);
+                if (nextHandler != null) {
+                    SendMessage nextMessages = nextHandler.handle(chatId, update);
+                    if (nextMessages != null) {
                         try {
                             execute(nextMessages);
                         } catch (TelegramApiException e) {
                             throw new RuntimeException(e);
                         }
+                    }
                 }
             }
         }
+
 
     }
 
