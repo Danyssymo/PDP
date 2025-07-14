@@ -3,6 +3,7 @@ package blr.dany.telegramservice;
 import blr.dany.telegramservice.commands.Command;
 import blr.dany.telegramservice.commands.CommandHandler;
 import blr.dany.telegramservice.commands.HandleFactory;
+import blr.dany.telegramservice.service.CommandFlowService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class MeteoGenieBot extends TelegramLongPollingBot {
 
     private final HandleFactory handlerFactory;
+    private final CommandFlowService commandFlowService;
 
     @Value("${telegram.bot.name}")
     private String botName;
@@ -40,25 +42,35 @@ public class MeteoGenieBot extends TelegramLongPollingBot {
         if (command != null) {
             CommandHandler handler = handlerFactory.getHandler(command);
             if (handler != null) {
-                handler.handle(chatId, update);
+               var message = handler.handle(chatId, update);
+                try {
+                    execute(message);
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
+
+        Command nextCommand = commandFlowService.nextStep(chatId, update);
+        if (nextCommand != null) {
+            CommandHandler nextHandler = handlerFactory.getHandler(nextCommand);
+            if (nextHandler != null) {
+                SendMessage nextMessages = nextHandler.handle(chatId, update);
+                if (nextMessages != null) {
+                        try {
+                            execute(nextMessages);
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException(e);
+                        }
+                }
+            }
+        }
+
     }
 
     @Override
     public String getBotUsername() {
         return botName;
-    }
-
-    private void sendMessage(long chatId, String text) {
-        SendMessage message = new SendMessage();
-        message.setChatId(String.valueOf(chatId));
-        message.setText(text);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
     }
 
 }
