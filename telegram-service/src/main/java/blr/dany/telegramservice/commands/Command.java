@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum Command {
 
     START("/start"),
-    SET_REGION("/region");
+    SET_REGION("/region"),
+    MENU("/menu");
 
     private final String commandText;
 

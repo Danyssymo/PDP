@@ -1,9 +1,9 @@
 package blr.dany.telegramservice;
 
+import blr.dany.telegramservice.callback.CallbackHandlerFactory;
 import blr.dany.telegramservice.commands.Command;
 import blr.dany.telegramservice.commands.CommandHandler;
 import blr.dany.telegramservice.commands.HandleFactory;
-import blr.dany.telegramservice.service.CommandFlowService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,12 +13,14 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class MeteoGenieBot extends TelegramLongPollingBot {
 
     private final HandleFactory handlerFactory;
-    private final CommandFlowService commandFlowService;
+    private final CallbackHandlerFactory callbackHandlerFactory;
 
     @Value("${telegram.bot.name}")
     private String botName;
@@ -28,9 +30,26 @@ public class MeteoGenieBot extends TelegramLongPollingBot {
     private String botToken;
 
 
-
     @Override
     public void onUpdateReceived(Update update) {
+
+        if (update.hasCallbackQuery()) {
+            String callbackData = update.getCallbackQuery().getData();
+            long chatId = update.getCallbackQuery().getMessage().getChatId();
+            callbackHandlerFactory.getHandler(callbackData)
+                    .ifPresentOrElse(handler -> {
+                        List<SendMessage> response = handler.handle(callbackData, chatId);
+                        try {
+                            for (SendMessage msg :response) {
+                                execute(msg);
+                            }
+                        } catch (TelegramApiException e) {
+                            throw new RuntimeException("Ошибка при отправке", e);
+                        }
+                    }, () -> System.out.println("Нет хендлера для callback: " + callbackData));
+            return;
+        }
+
         if (!update.hasMessage() || !update.getMessage().hasText()) {
             return;
         }
@@ -42,33 +61,14 @@ public class MeteoGenieBot extends TelegramLongPollingBot {
         if (command != null) {
             CommandHandler handler = handlerFactory.getHandler(command);
             if (handler != null) {
-               var message = handler.handle(chatId, update);
+               SendMessage message = handler.handle(chatId, update);
                 try {
-                    execute(message);
+                        execute(message);
                 } catch (TelegramApiException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
-
-        if (command == Command.START){
-            Command nextCommand = commandFlowService.nextStep(chatId, update);
-            if (nextCommand != null) {
-                CommandHandler nextHandler = handlerFactory.getHandler(nextCommand);
-                if (nextHandler != null) {
-                    SendMessage nextMessages = nextHandler.handle(chatId, update);
-                    if (nextMessages != null) {
-                        try {
-                            execute(nextMessages);
-                        } catch (TelegramApiException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-            }
-        }
-
-
     }
 
     @Override
