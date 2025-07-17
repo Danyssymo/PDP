@@ -18,7 +18,7 @@ public class StartCommand implements CommandHandler {
     @Override
     public SendMessage handle(long chatId, Update update) {
 
-        Boolean flag = false;
+        Boolean flag = true;
 
         String username = update.getMessage().getFrom().getUserName();
         String greetingMessage = "Привет " + username;
