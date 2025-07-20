@@ -20,6 +20,9 @@
             <column name="country" type="VARCHAR(100)">
                 <constraints nullable="false"/>
             </column>
+            <column name="chat_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

@@ -1,7 +1,11 @@
 package blr.dany.telegramservice.commands.impl;
 
 import blr.dany.telegramservice.commands.CommandHandler;
+import blr.dany.telegramservice.feign.UserServiceClient;
+import blr.dany.telegramservice.feign.request.CreateUserRequestDto;
+import blr.dany.telegramservice.feign.response.TelegramUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -14,6 +18,7 @@ public class StartCommand implements CommandHandler {
 
     private final RegionCommand regionCommand;
     private final MenuCommand menuCommand;
+    private final UserServiceClient userServiceClient;
 
     @Override
     public SendMessage handle(long chatId, Update update) {
@@ -24,7 +29,18 @@ public class StartCommand implements CommandHandler {
         String greetingMessage = "Привет " + username;
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(chatId);
+
+        ResponseEntity<TelegramUser> response = userServiceClient.getUserByChatId(String.valueOf(chatId));
+        TelegramUser user = response.getBody();
+        System.out.println("5555555" + user);
+
         if (flag){
+            CreateUserRequestDto createUserRequestDto = new CreateUserRequestDto();
+            createUserRequestDto.setCountry("Минск");
+            createUserRequestDto.setIsSub(true);
+            createUserRequestDto.setTelegramName("Dan");
+            createUserRequestDto.setChatId(String.valueOf(chatId));
+            userServiceClient.createUser(createUserRequestDto);
             SendMessage regionMessage = regionCommand.handle(chatId, update);
             sendMessage.setText(greetingMessage + "\n\n" + regionMessage.getText());
             sendMessage.setReplyMarkup(regionMessage.getReplyMarkup());

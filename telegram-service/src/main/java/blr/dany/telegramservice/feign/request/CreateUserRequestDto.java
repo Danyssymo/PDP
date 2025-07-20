@@ -1,11 +1,11 @@
-package blr.dany.userservice.controller.request;
+package blr.dany.telegramservice.feign.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class UserRequestDto {
+public class CreateUserRequestDto {
 
     @NotBlank(message = "Имя не должно быть пустым")
     private String telegramName;

@@ -1,6 +1,7 @@
 package blr.dany.userservice.service.impl;
 
 import blr.dany.userservice.controller.request.UserRequestDto;
+import blr.dany.userservice.entity.User;
 import blr.dany.userservice.mapper.UserMapper;
 import blr.dany.userservice.repository.UserRepository;
 import blr.dany.userservice.service.UserService;
@@ -19,4 +20,11 @@ public class UserServiceImpl implements UserService {
     public void save(UserRequestDto userRequestDto) {
         userRepository.save(userMapper.toEntity(userRequestDto));
     }
+
+    @Override
+    public User getUserByChatId(String chatId) {
+        return userRepository.findByChatId(chatId).orElse(null);
+    }
+
+
 }

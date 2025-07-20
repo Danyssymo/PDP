@@ -9,6 +9,9 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
 
     @Mapping(target = "telegramName", source = "telegramName")
+    @Mapping(target = "isSub", source = "isSub")
+    @Mapping(target = "country", source = "country")
+    @Mapping(target = "chatId", source = "chatId")
     User toEntity (UserRequestDto userRequestDto);
 
 }

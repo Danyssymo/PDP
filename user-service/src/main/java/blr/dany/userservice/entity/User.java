@@ -24,4 +24,6 @@ public class User {
     private Boolean isSub;
     @Column(name = "country")
     private String country;
+    @Column(name = "chat_id")
+    private String chatId;
 }
