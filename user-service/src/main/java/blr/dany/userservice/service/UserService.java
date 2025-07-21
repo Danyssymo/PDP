@@ -7,5 +7,7 @@ public interface UserService {
 
     void save(UserRequestDto userRequestDto);
     User getUserByChatId(String chatId);
+    void changeRegion(String chatId, String country);
+    void changeSubscription(String chatId, boolean isSub);
 
 }

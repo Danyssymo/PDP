@@ -27,5 +27,16 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getUserByChatId(chatId));
     }
 
+    @PatchMapping("/{chatId}/region")
+    public ResponseEntity<Void> changeUserRegion(@PathVariable String chatId, @RequestParam String country){
+        userService.changeRegion(chatId, country);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{chatId}/subscription")
+    public ResponseEntity<Void> changeUserSubscription(@PathVariable String chatId, @RequestParam boolean isSub){
+        userService.changeSubscription(chatId, isSub);
+        return ResponseEntity.ok().build();
+    }
 
 }

@@ -7,6 +7,7 @@ import blr.dany.userservice.repository.UserRepository;
 import blr.dany.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,14 +17,28 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
 
+    @Transactional
     @Override
     public void save(UserRequestDto userRequestDto) {
         userRepository.save(userMapper.toEntity(userRequestDto));
     }
 
+    @Transactional
     @Override
     public User getUserByChatId(String chatId) {
         return userRepository.findByChatId(chatId).orElse(null);
+    }
+
+    @Transactional
+    @Override
+    public void changeRegion(String chatId, String country) {
+        userRepository.findByChatId(chatId).ifPresent(user -> user.setCountry(country));
+    }
+
+    @Transactional
+    @Override
+    public void changeSubscription(String chatId, boolean isSub) {
+        userRepository.findByChatId(chatId).ifPresent(user -> user.setIsSub(isSub));
     }
 
 

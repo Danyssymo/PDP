@@ -23,8 +23,6 @@ public class StartCommand implements CommandHandler {
     @Override
     public SendMessage handle(long chatId, Update update) {
 
-        Boolean flag = true;
-
         String username = update.getMessage().getFrom().getUserName();
         String greetingMessage = "Привет " + username;
         SendMessage sendMessage = new SendMessage();
@@ -32,15 +30,18 @@ public class StartCommand implements CommandHandler {
 
         ResponseEntity<TelegramUser> response = userServiceClient.getUserByChatId(String.valueOf(chatId));
         TelegramUser user = response.getBody();
-        System.out.println("5555555" + user);
 
-        if (flag){
+        if (user == null){
+            SendMessage regionMessage = regionCommand.handle(chatId, update);
+            sendMessage.setText(greetingMessage + "\n\n" + regionMessage.getText());
+            sendMessage.setReplyMarkup(regionMessage.getReplyMarkup());
             CreateUserRequestDto createUserRequestDto = new CreateUserRequestDto();
-            createUserRequestDto.setCountry("Минск");
-            createUserRequestDto.setIsSub(true);
-            createUserRequestDto.setTelegramName("Dan");
             createUserRequestDto.setChatId(String.valueOf(chatId));
+            createUserRequestDto.setTelegramName(username);
+            createUserRequestDto.setIsSub(false);
             userServiceClient.createUser(createUserRequestDto);
+            return sendMessage;
+        } else if (user.getCountry() == null){
             SendMessage regionMessage = regionCommand.handle(chatId, update);
             sendMessage.setText(greetingMessage + "\n\n" + regionMessage.getText());
             sendMessage.setReplyMarkup(regionMessage.getReplyMarkup());

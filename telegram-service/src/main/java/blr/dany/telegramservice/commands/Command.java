@@ -7,7 +7,8 @@ public enum Command {
 
     START("/start"),
     SET_REGION("/region"),
-    MENU("/menu");
+    MENU("/menu"),
+    SUB("/sub");
 
     private final String commandText;
 
