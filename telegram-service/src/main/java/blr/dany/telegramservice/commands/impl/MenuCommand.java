@@ -48,6 +48,11 @@ public class MenuCommand implements CommandHandler {
                 .callbackData("menu:region")
                 .build()));
 
+        rows.add(List.of(InlineKeyboardButton.builder()
+                .text("Погода на сейчас")
+                .callbackData("menu:current")
+                .build()));
+
         markup.setKeyboard(rows);
         message.setReplyMarkup(markup);
 

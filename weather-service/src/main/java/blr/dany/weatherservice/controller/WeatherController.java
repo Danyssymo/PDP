@@ -18,9 +18,7 @@ public class WeatherController {
 
     @GetMapping("/current")
     public Mono<CurrentWeatherResponse> getCurrentWeather(@RequestParam String city) {
-        var x = weatherService.getCurrentWeather(city);
-        System.out.println(x);
-        return x;
+        return weatherService.getCurrentWeather(city);
     }
 
 }
