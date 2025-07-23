@@ -62,7 +62,7 @@ public class ForecastDay {
 
     private Integer avgHumidity;
 
-    private Boolean dailyWillItRain;
+    private Integer dailyWillItRain;
 
     private Integer dailyChanceOfRain;
 

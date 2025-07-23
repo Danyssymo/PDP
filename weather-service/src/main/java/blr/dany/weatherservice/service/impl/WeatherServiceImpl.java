@@ -79,10 +79,9 @@ public class WeatherServiceImpl {
                 System.out.println("--- Почасовой прогноз ---");
                 dayDto.getHour().forEach(hourDto -> {
                     HourlyForecast hourly = hourlyForecastMapper.toEntity(hourDto);
-                    System.out.printf("Время: %s | Темп: %.1f°C | Дождь: %s (шанс %d%%)%n",
+                    System.out.printf("Время: %s | Темп: %.1f°C | (шанс %d%%)%n",
                             hourly.getTime(),
                             hourly.getTempC(),
-                            hourly.getWillItRain() ? "Да" : "Нет",
                             hourly.getChanceOfRain());
                 });
                 System.out.println();

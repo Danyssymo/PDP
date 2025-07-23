@@ -53,7 +53,7 @@ public class HourlyForecast {
     @Column
     private Double feelsLikeC;
 
-    private Boolean willItRain;
+    private Integer willItRain;
     private Integer chanceOfRain;
 
     @Column

@@ -63,7 +63,7 @@
             <column name="totalprecip_mm" type="DECIMAL(5,2)"/>
             <column name="avgvis_km" type="DECIMAL(5,2)"/>
             <column name="avghumidity" type="INTEGER"/>
-            <column name="daily_will_it_rain" type="BOOLEAN"/>
+            <column name="daily_will_it_rain" type="INTEGER"/>
             <column name="daily_chance_of_rain" type="INTEGER"/>
             <column name="uv_index" type="DECIMAL(4,2)"/>
 
@@ -110,7 +110,7 @@
             <column name="humidity" type="INTEGER"/>
             <column name="cloud" type="INTEGER"/>
             <column name="feelslike_c" type="DECIMAL(5,2)"/>
-            <column name="will_it_rain" type="BOOLEAN"/>
+            <column name="will_it_rain" type="INTEGER"/>
             <column name="chance_of_rain" type="INTEGER"/>
             <column name="visibility_km" type="DECIMAL(5,2)"/>
 

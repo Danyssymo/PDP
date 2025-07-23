@@ -20,6 +20,8 @@ public interface ForecastDayMapper {
     @Mapping(target = "sunset", source = "astro.sunset", qualifiedByName = "mapAstroTime")
     @Mapping(target = "moonrise", source = "astro.moonrise", qualifiedByName = "mapAstroTime")
     @Mapping(target = "moonset", source = "astro.moonset", qualifiedByName = "mapAstroTime")
+    @Mapping(target = "moonPhase", source = "astro.moonPhase")
+    @Mapping(target = "moonIllumination", source = "astro.moonIllumination")
     @Mapping(target = "maxTempC", source = "day.maxTempC")
     @Mapping(target = "minTempC", source = "day.minTempC")
     @Mapping(target = "avgTempC", source = "day.avgTempC")
