@@ -1,6 +1,7 @@
 package blr.dany.weatherservice.controller;
 
 import blr.dany.weatherservice.dto.response.CurrentWeatherResponse;
+import blr.dany.weatherservice.dto.response.ForecastResponse;
 import blr.dany.weatherservice.service.impl.WeatherServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,4 +22,15 @@ public class WeatherController {
         return weatherService.getCurrentWeather(city);
     }
 
+    @GetMapping("/test")
+    public Mono<ForecastResponse> getForecast(@RequestParam String city, @RequestParam int days) {
+        return weatherService.getForecast(city, days);
+    }
+
+    @GetMapping("/map")
+    public String testMapping(@RequestParam String city) {
+        ForecastResponse response = weatherService.getForecast(city, 1).block();
+        weatherService.test(response);
+        return "Проверка маппинга выполнена. Смотрите логи в консоли.";
+    }
 }
