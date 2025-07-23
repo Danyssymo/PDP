@@ -29,8 +29,9 @@ public class WeatherController {
 
     @GetMapping("/map")
     public String testMapping(@RequestParam String city) {
-        ForecastResponse response = weatherService.getForecast(city, 1).block();
+        ForecastResponse response = weatherService.getForecast(city, 3).block();
         weatherService.test(response);
+        weatherService.save(response);
         return "Проверка маппинга выполнена. Смотрите логи в консоли.";
     }
 }

@@ -5,10 +5,15 @@ import blr.dany.weatherservice.dto.response.ForecastResponse;
 import blr.dany.weatherservice.entity.ForecastDay;
 import blr.dany.weatherservice.entity.HourlyForecast;
 import blr.dany.weatherservice.entity.Location;
+import blr.dany.weatherservice.entity.WeatherCondition;
 import blr.dany.weatherservice.mapper.ForecastDayMapper;
 import blr.dany.weatherservice.mapper.HourlyForecastMapper;
 import blr.dany.weatherservice.mapper.LocationMapper;
+import blr.dany.weatherservice.repository.HourlyForecastRepository;
+import blr.dany.weatherservice.repository.LocationRepository;
+import blr.dany.weatherservice.repository.WeatherConditionRepository;
 import blr.dany.weatherservice.repository.WeatherDayRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,6 +29,9 @@ public class WeatherServiceImpl {
 
     private final WebClient weatherWebClient;
     private final WeatherDayRepository weatherDayRepository;
+    private final LocationRepository locationRepository;
+    private final HourlyForecastRepository hourlyForecastRepository;
+    private final WeatherConditionRepository weatherConditionRepository;
     private final LocationMapper locationMapper;
     private final ForecastDayMapper forecastDayMapper;
     private final HourlyForecastMapper hourlyForecastMapper;
@@ -87,6 +95,25 @@ public class WeatherServiceImpl {
                 System.out.println();
             }
         });
+    }
+
+    @Transactional
+    public void save(ForecastResponse forecastResponse) {
+        System.out.println("LESTTTT GOOOO");
+        Location location = locationMapper.toEntity(forecastResponse.getLocation());
+        List<ForecastDay> forecastDays = forecastResponse.getForecast().getForecastDay().stream()
+                .map(forecastDayDto -> {
+                    ForecastDay forecastDay = forecastDayMapper.toEntity(forecastDayDto);
+                    forecastDay.setLocation(location);
+                    if (forecastDay.getHourlyForecasts() != null) {
+                        forecastDay.getHourlyForecasts().forEach(hour -> hour.setForecastDay(forecastDay));
+                    }
+                    return forecastDay;
+                })
+                .toList();
+        location.setForecastDays(forecastDays);
+        locationRepository.save(location);
+
     }
 
 }

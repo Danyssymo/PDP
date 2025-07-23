@@ -27,7 +27,7 @@ public class ForecastDay {
 
     @Column(nullable = false)
     private LocalDate date;
-
+    @Column(name = "date_epoch")
     private Long dateEpoch;
 
     // Астрономические данные
@@ -36,41 +36,43 @@ public class ForecastDay {
     private LocalTime moonrise;
     private LocalTime moonset;
 
-    @Column(length = 50)
+    @Column(name = "moon_phase", length = 50)
     private String moonPhase;
-
+    @Column(name = "moon_illumination")
     private Integer moonIllumination;
 
     // Основные метеоданные
-    @Column
+    @Column(name = "maxtemp_c")
     private Double maxTempC;
 
-    @Column
+    @Column(name = "mintemp_c")
     private Double minTempC;
 
-    @Column
+    @Column(name = "avgtemp_c")
     private Double avgTempC;
 
-    @Column
+    @Column(name = "maxwind_kph")
     private Double maxWindKph;
 
-    @Column
+    @Column(name = "totalprecip_mm")
     private Double totalPrecipMm;
 
-    @Column
+    @Column(name = "avgvis_km")
     private Double avgVisKm;
-
+    @Column(name = "avghumidity")
     private Integer avgHumidity;
-
+    @Column(name = "daily_will_it_rain")
     private Integer dailyWillItRain;
-
+    @Column(name = "daily_chance_of_rain")
     private Integer dailyChanceOfRain;
 
-    @Column
+    @Column(name = "uv_index")
     private Double uvIndex;
 
     // Качество воздуха
+    @Column(name = "aqi_us_epa_index")
     private Integer aqiUsEpaIndex;
+    @Column(name = "aqi_gb_defra_index")
     private Integer aqiGbDefraIndex;
 
     // Связи
