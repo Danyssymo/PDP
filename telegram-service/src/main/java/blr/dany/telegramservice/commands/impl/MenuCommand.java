@@ -53,6 +53,11 @@ public class MenuCommand implements CommandHandler {
                 .callbackData("menu:current")
                 .build()));
 
+        rows.add(List.of(InlineKeyboardButton.builder()
+                .text("Прогноз на 7 дней")
+                .callbackData("menu:forecast")
+                .build()));
+
         markup.setKeyboard(rows);
         message.setReplyMarkup(markup);
 

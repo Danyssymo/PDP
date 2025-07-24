@@ -1,10 +1,7 @@
 package blr.dany.telegramservice.callback.impl;
 
 import blr.dany.telegramservice.callback.CallbackHandler;
-import blr.dany.telegramservice.commands.impl.CurrentWeatherCommand;
-import blr.dany.telegramservice.commands.impl.MenuCommand;
-import blr.dany.telegramservice.commands.impl.RegionCommand;
-import blr.dany.telegramservice.commands.impl.SubCommand;
+import blr.dany.telegramservice.commands.impl.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,6 +16,7 @@ public class MenuCallbackHandler implements CallbackHandler {
     private final MenuCommand menuCommand;
     private final SubCommand subCommand;
     private final CurrentWeatherCommand currentWeatherCommand;
+    private final ForecastCommand forecastCommand;
 
     @Override
     public boolean supports(String callbackData) {
@@ -35,6 +33,10 @@ public class MenuCallbackHandler implements CallbackHandler {
             msg = subCommand.handle(chatId, null);
         } else if (menuStep.equals("current")) {
             msg = currentWeatherCommand.handle(chatId, null);
+            SendMessage backToMenu = menuCommand.handle(chatId, null);
+            return List.of(msg, backToMenu);
+        } else if (menuStep.equals("forecast")) {
+            msg = forecastCommand.handle(chatId, null);
             SendMessage backToMenu = menuCommand.handle(chatId, null);
             return List.of(msg, backToMenu);
         } else {

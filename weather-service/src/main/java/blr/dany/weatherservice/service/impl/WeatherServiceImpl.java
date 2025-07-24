@@ -1,7 +1,6 @@
 package blr.dany.weatherservice.service.impl;
 
-import blr.dany.weatherservice.dto.response.CurrentWeatherResponse;
-import blr.dany.weatherservice.dto.response.ForecastResponse;
+import blr.dany.weatherservice.dto.response.*;
 import blr.dany.weatherservice.entity.ForecastDay;
 import blr.dany.weatherservice.entity.HourlyForecast;
 import blr.dany.weatherservice.entity.Location;
@@ -13,6 +12,8 @@ import blr.dany.weatherservice.repository.HourlyForecastRepository;
 import blr.dany.weatherservice.repository.LocationRepository;
 import blr.dany.weatherservice.repository.WeatherConditionRepository;
 import blr.dany.weatherservice.repository.WeatherDayRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +21,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +42,7 @@ public class WeatherServiceImpl {
     private final LocationMapper locationMapper;
     private final ForecastDayMapper forecastDayMapper;
     private final HourlyForecastMapper hourlyForecastMapper;
+    private final EntityManager entityManager;
 
     @Value("${weather.api.key}")
     private String apiKey;
@@ -59,61 +67,119 @@ public class WeatherServiceImpl {
                 .retrieve().bodyToMono(ForecastResponse.class);
     }
 
-    public void test(ForecastResponse forecastResponse) {
-        // 1. Маппим и выводим локацию
-        Location location = locationMapper.toEntity(forecastResponse.getLocation());
-        System.out.println("=== ЛОКАЦИЯ ===");
-        System.out.printf("Город: %s, Страна: %s%n", location.getName(), location.getCountry());
-        System.out.printf("Координаты: %.4f, %.4f%n", location.getLatitude(), location.getLongitude());
-        System.out.println("Timezone: " + location.getTimezone());
-        System.out.println();
+    @Transactional
+    public List<ForecastDayResponse> getNextDaysForecast(String name) {
+        Optional<Location> locationOpt = locationRepository.findByName(name);
+        if (locationOpt.isEmpty()) {
+            throw new EntityNotFoundException("Location not found");
+        }
 
-        // 2. Маппим и выводим прогнозы по дням
-        System.out.println("=== ДНЕВНЫЕ ПРОГНОЗЫ ===");
-        forecastResponse.getForecast().getForecastDay().forEach(dayDto -> {
-            ForecastDay forecastDay = forecastDayMapper.toEntity(dayDto);
-            System.out.printf("Дата: %s | Мин.темп: %.1f°C | Макс.темп: %.1f°C%n",
-                    forecastDay.getDate(),
-                    forecastDay.getMinTempC(),
-                    forecastDay.getMaxTempC());
-            System.out.printf("Восход: %s | Закат: %s%n",
-                    forecastDay.getSunrise(),
-                    forecastDay.getSunset());
-            System.out.printf("Вероятность дождя: %d%%%n", forecastDay.getDailyChanceOfRain());
-            System.out.println();
+        Location location = locationOpt.get();
 
-            // 3. Маппим и выводим почасовые прогнозы
-            if (dayDto.getHour() != null && !dayDto.getHour().isEmpty()) {
-                System.out.println("--- Почасовой прогноз ---");
-                dayDto.getHour().forEach(hourDto -> {
-                    HourlyForecast hourly = hourlyForecastMapper.toEntity(hourDto);
-                    System.out.printf("Время: %s | Темп: %.1f°C | (шанс %d%%)%n",
-                            hourly.getTime(),
-                            hourly.getTempC(),
-                            hourly.getChanceOfRain());
-                });
-                System.out.println();
-            }
-        });
+        LocalDate today = LocalDate.now();
+
+        List<ForecastDay> days = weatherDayRepository.findNextDays(location, today);
+        return forecastDayMapper.toDtos(days);
     }
+
 
     @Transactional
     public void save(ForecastResponse forecastResponse) {
-        System.out.println("LESTTTT GOOOO");
-        Location location = locationMapper.toEntity(forecastResponse.getLocation());
-        List<ForecastDay> forecastDays = forecastResponse.getForecast().getForecastDay().stream()
-                .map(forecastDayDto -> {
-                    ForecastDay forecastDay = forecastDayMapper.toEntity(forecastDayDto);
-                    forecastDay.setLocation(location);
-                    if (forecastDay.getHourlyForecasts() != null) {
-                        forecastDay.getHourlyForecasts().forEach(hour -> hour.setForecastDay(forecastDay));
-                    }
-                    return forecastDay;
-                })
-                .toList();
-        location.setForecastDays(forecastDays);
-        locationRepository.save(location);
+        LocationResponse locationDto = forecastResponse.getLocation();
 
+        Location location = locationRepository.findByName(locationDto.getName())
+                .orElseGet(() -> locationMapper.toEntity(locationDto));
+
+        for (ForecastDayResponse forecastDayDto : forecastResponse.getForecast().getForecastDay()) {
+            LocalDate date = LocalDate.parse(forecastDayDto.getDate());
+
+            Optional<ForecastDay> existingDayOpt = weatherDayRepository.findByLocationAndDate(location, date);
+
+            ForecastDay forecastDayEntity;
+            if (existingDayOpt.isPresent()) {
+                forecastDayEntity = existingDayOpt.get();
+
+                if (forecastDayEntity.getHourlyForecasts() != null) {
+                    Iterator<HourlyForecast> iterator = forecastDayEntity.getHourlyForecasts().iterator();
+                    while (iterator.hasNext()) {
+                        HourlyForecast hour = iterator.next();
+                        iterator.remove();
+                    }
+                }
+                entityManager.flush();
+
+                updateForecastDayFromDto(forecastDayEntity, forecastDayDto);
+
+            } else {
+                forecastDayEntity = forecastDayMapper.toEntity(forecastDayDto);
+                forecastDayEntity.setLocation(location);
+
+                if (forecastDayEntity.getHourlyForecasts() != null) {
+                    forecastDayEntity.getHourlyForecasts()
+                            .forEach(hour -> hour.setForecastDay(forecastDayEntity));
+                }
+            }
+
+            location.getForecastDays().removeIf(day -> day.getDate().equals(date));
+            location.getForecastDays().add(forecastDayEntity);
+        }
+
+        locationRepository.save(location);
     }
 
+    @Transactional
+    public void updateForecastDayFromDto(ForecastDay entity, ForecastDayResponse dto) {
+        forecastDayMapper.updateFromDto(dto, entity);
+
+        List<HourlyForecast> existingHours = entity.getHourlyForecasts();
+        List<HourResponse> newHours = dto.getHour();
+
+        if (newHours == null || newHours.isEmpty()) {
+            if (existingHours != null) {
+                existingHours.clear();
+            }
+            return;
+        }
+
+        if (existingHours == null) {
+            entity.setHourlyForecasts(new ArrayList<>());
+            existingHours = entity.getHourlyForecasts();
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        List<HourlyForecast> hoursToRemove = new ArrayList<>();
+
+        for (HourlyForecast existingHour : existingHours) {
+            boolean existsInDto = newHours.stream()
+                    .anyMatch(dtoHour -> {
+                        LocalDateTime dtoTime = LocalDateTime.parse(dtoHour.getTime(), formatter);
+                        return existingHour.getTime().equals(dtoTime);
+                    });
+            if (!existsInDto) {
+                hoursToRemove.add(existingHour);
+            }
+        }
+
+        existingHours.removeAll(hoursToRemove);
+
+        for (HourResponse hourDto : newHours) {
+            LocalDateTime hourTime = LocalDateTime.parse(hourDto.getTime(), formatter);
+
+            Optional<HourlyForecast> match = existingHours.stream()
+                    .filter(h -> h.getTime().equals(hourTime))
+                    .findFirst();
+
+            if (match.isPresent()) {
+                hourlyForecastMapper.updateFromDto(hourDto, match.get());
+                match.get().setForecastDay(entity);
+            } else {
+                HourlyForecast newHourly = hourlyForecastMapper.toEntity(hourDto);
+                newHourly.setForecastDay(entity);
+                existingHours.add(newHourly);
+            }
+        }
+
+        existingHours.forEach(h -> h.setForecastDay(entity));
+    }
 }

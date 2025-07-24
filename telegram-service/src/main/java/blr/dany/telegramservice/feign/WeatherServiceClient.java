@@ -1,6 +1,7 @@
 package blr.dany.telegramservice.feign;
 
 import blr.dany.telegramservice.feign.response.CurrentWeatherResponse;
+import blr.dany.telegramservice.feign.response.ForecastResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,5 +11,8 @@ public interface WeatherServiceClient {
 
     @GetMapping("/api/v1/weather/current")
     CurrentWeatherResponse getCurrentWeather(@RequestParam String city);
+
+    @GetMapping("/api/v1/weather/forecast")
+    ForecastResponse getForecast(@RequestParam String city);
 
 }
