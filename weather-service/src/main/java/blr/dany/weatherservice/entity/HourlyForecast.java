@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "hourly_forecasts", schema = "weather_service_schema")
 @Getter
 @Setter
+@ToString
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,6 +19,7 @@ public class HourlyForecast {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "forecast_day_id", nullable = false)
     private ForecastDay forecastDay;

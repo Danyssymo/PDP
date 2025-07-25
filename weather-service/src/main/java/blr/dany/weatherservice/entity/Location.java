@@ -3,6 +3,7 @@ package blr.dany.weatherservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -37,5 +38,5 @@ public class Location {
     private String timezone;
 
     @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<ForecastDay> forecastDays;
+    private List<ForecastDay> forecastDays = new ArrayList<>();
 }

@@ -88,7 +88,7 @@ public class WeatherServiceImpl {
         LocationResponse locationDto = forecastResponse.getLocation();
 
         Location location = locationRepository.findByName(locationDto.getName())
-                .orElseGet(() -> locationMapper.toEntity(locationDto));
+                .orElseGet(() -> locationRepository.save(locationMapper.toEntity(locationDto)));
 
         for (ForecastDayResponse forecastDayDto : forecastResponse.getForecast().getForecastDay()) {
             LocalDate date = LocalDate.parse(forecastDayDto.getDate());
@@ -120,8 +120,9 @@ public class WeatherServiceImpl {
                 }
             }
 
-            location.getForecastDays().removeIf(day -> day.getDate().equals(date));
-            location.getForecastDays().add(forecastDayEntity);
+                location.getForecastDays().removeIf(day -> day.getDate().equals(date));
+                location.getForecastDays().add(forecastDayEntity);
+
         }
 
         locationRepository.save(location);

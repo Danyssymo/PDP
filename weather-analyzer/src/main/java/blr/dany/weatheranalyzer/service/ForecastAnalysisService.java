@@ -4,6 +4,7 @@ import blr.dany.weatheranalyzer.dto.response.ForecastDayResponse;
 import blr.dany.weatheranalyzer.dto.response.ForecastResponse;
 import blr.dany.weatheranalyzer.dto.response.HourResponse;
 import blr.dany.weatheranalyzer.feign.WeatherFeignClient;
+import blr.dany.weatheranalyzer.kafka.ForecastKafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +17,15 @@ import java.util.LinkedHashMap;
 public class ForecastAnalysisService {
 
     private final WeatherFeignClient weatherFeignClient;
+    private final ForecastKafkaProducer forecastKafkaProducer;
 
     private DangerLevel analyzeDay(ForecastDayResponse forecastDay) {
         for (HourResponse hourly : forecastDay.getHour()) {
             double windKph = hourly.getWindKph();
             double tempC = hourly.getTempC();
             double precipitationMm = hourly.getPrecipMm();
-            String condition = hourly.getCondition().toString().toLowerCase();
 
-            if (windKph > 70 || tempC > 38 || tempC < -20 || condition.contains("storm")) {
+            if (windKph > 70 || tempC > 38 || tempC < -20) {
                 return DangerLevel.RED;
             }
 
@@ -38,11 +39,14 @@ public class ForecastAnalysisService {
 
     public Map<String, DangerLevel> analyzeForecast(String cityName) {
         List<ForecastDayResponse> forecastResponse = weatherFeignClient.getNextDayForecast(cityName);
-        Map<String, DangerLevel> dangerByDate = new LinkedHashMap<>(); // сохраняет порядок
+        Map<String, DangerLevel> dangerByDate = new LinkedHashMap<>();
 
         for (ForecastDayResponse day : forecastResponse) {
             DangerLevel level = analyzeDay(day);
             dangerByDate.put(day.getDate(), level);
+            if (level == DangerLevel.YELLOW){
+                forecastKafkaProducer.sendYellowAlert(day);
+            }
         }
 
         return dangerByDate;
