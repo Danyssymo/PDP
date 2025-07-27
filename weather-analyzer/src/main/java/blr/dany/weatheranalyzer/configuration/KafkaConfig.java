@@ -1,5 +1,6 @@
 package blr.dany.weatheranalyzer.configuration;
 
+import blr.dany.weatheranalyzer.dto.request.KafkaAlert;
 import blr.dany.weatheranalyzer.dto.response.ForecastDayResponse;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class KafkaConfig {
 
     @Bean
-    public ProducerFactory<String, ForecastDayResponse> producerFactory() {
+    public ProducerFactory<String, KafkaAlert> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -26,7 +27,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, ForecastDayResponse> kafkaTemplate() {
+    public KafkaTemplate<String, KafkaAlert> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 

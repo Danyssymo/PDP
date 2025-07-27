@@ -1,5 +1,6 @@
 package blr.dany.weatheranalyzer.service;
 
+import blr.dany.weatheranalyzer.dto.request.KafkaAlert;
 import blr.dany.weatheranalyzer.dto.response.ForecastDayResponse;
 import blr.dany.weatheranalyzer.dto.response.ForecastResponse;
 import blr.dany.weatheranalyzer.dto.response.HourResponse;
@@ -45,7 +46,8 @@ public class ForecastAnalysisService {
             DangerLevel level = analyzeDay(day);
             dangerByDate.put(day.getDate(), level);
             if (level == DangerLevel.YELLOW){
-                forecastKafkaProducer.sendYellowAlert(day);
+                KafkaAlert kafkaAlert = new KafkaAlert(day, cityName);
+                forecastKafkaProducer.sendYellowAlert(kafkaAlert);
             }
         }
 

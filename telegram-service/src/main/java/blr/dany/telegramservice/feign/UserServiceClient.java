@@ -7,6 +7,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @FeignClient(name = "user-service", url = "${user.service.url}")
 public interface UserServiceClient {
 
@@ -15,6 +17,12 @@ public interface UserServiceClient {
 
     @GetMapping("/api/v1/users/{chatId}")
     ResponseEntity<TelegramUser> getUserByChatId(@PathVariable String chatId);
+
+    @GetMapping("/api/v1/users")
+    ResponseEntity<List<TelegramUser>> getUsersBySubAndCountry(
+            @RequestParam("isSub") Boolean isSub,
+            @RequestParam("country") String country
+    );
 
     @PatchMapping("/api/v1/users/{chatId}/region")
     ResponseEntity<Void> changeUserRegion(

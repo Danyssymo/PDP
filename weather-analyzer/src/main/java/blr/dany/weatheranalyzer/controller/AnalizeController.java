@@ -16,6 +16,6 @@ public class AnalizeController {
 
     @GetMapping("/test")
     public void test(){
-        System.out.println(forecastAnalysisService.analyzeForecast("Minsk"));
+        System.out.println(forecastAnalysisService.analyzeForecast("Ussuriysk"));
     }
 }

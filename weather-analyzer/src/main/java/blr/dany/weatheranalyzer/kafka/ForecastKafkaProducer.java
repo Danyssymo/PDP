@@ -1,5 +1,6 @@
 package blr.dany.weatheranalyzer.kafka;
 
+import blr.dany.weatheranalyzer.dto.request.KafkaAlert;
 import blr.dany.weatheranalyzer.dto.response.ForecastDayResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -10,12 +11,12 @@ import org.springframework.stereotype.Service;
 public class ForecastKafkaProducer {
 
 
-    private final KafkaTemplate<String, ForecastDayResponse> kafkaTemplate;
+    private final KafkaTemplate<String, KafkaAlert> kafkaTemplate;
 
     private static final String TOPIC = "weather-alerts";
 
-    public void sendYellowAlert(ForecastDayResponse forecast) {
-        kafkaTemplate.send(TOPIC, forecast.getDate(), forecast);
+    public void sendYellowAlert(KafkaAlert alert) {
+        kafkaTemplate.send(TOPIC, alert.getForecastDayResponse().getDate(), alert);
     }
 
 }
