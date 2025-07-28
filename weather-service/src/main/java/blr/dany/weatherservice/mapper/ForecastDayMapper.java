@@ -7,13 +7,14 @@ import org.mapstruct.*;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Mapper(componentModel = "spring", uses = HourlyForecastMapper.class)
 public interface ForecastDayMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "location", ignore = true) // Будем устанавливать отдельно
+    @Mapping(target = "location", ignore = true)
     @Mapping(target = "hourlyForecasts", source = "hour")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -116,10 +117,18 @@ public interface ForecastDayMapper {
 
     @Named("mapAstroTime")
     default LocalTime mapAstroTime(String time) {
-        if (time == null) return null;
-        // Формат времени в астрономических данных: "05:11 AM"
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
-        return LocalTime.parse(time, formatter);
+        if (time == null || time.equalsIgnoreCase("No moonset") || time.equalsIgnoreCase("No moonrise")
+                || time.equalsIgnoreCase("No sunrise") || time.equalsIgnoreCase("No sunset")) {
+            return null;
+        }
+
+        try {
+            // Формат времени в астрономических данных: "05:11 AM"
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
+            return LocalTime.parse(time, formatter);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
     }
 
     @Named("mapAstroTimeReverse")
@@ -127,15 +136,5 @@ public interface ForecastDayMapper {
         if (time == null) return null;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
         return time.format(formatter);
-    }
-
-    @AfterMapping
-    default void afterMapping(
-            @MappingTarget ForecastDay entity,
-            ForecastDayResponse dto) {
-        // Дополнительные преобразования, если нужны
-        if (dto.getDay() != null && dto.getDay().getCondition() != null) {
-            // Можно установить condition, если он нужен в ForecastDay
-        }
     }
 }

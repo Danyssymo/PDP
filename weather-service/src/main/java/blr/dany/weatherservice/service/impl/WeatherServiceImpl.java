@@ -12,6 +12,7 @@ import blr.dany.weatherservice.repository.HourlyForecastRepository;
 import blr.dany.weatherservice.repository.LocationRepository;
 import blr.dany.weatherservice.repository.WeatherConditionRepository;
 import blr.dany.weatherservice.repository.WeatherDayRepository;
+import blr.dany.weatherservice.service.WeatherService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class WeatherServiceImpl {
+public class WeatherServiceImpl implements WeatherService {
 
     private final WebClient weatherWebClient;
     private final WeatherDayRepository weatherDayRepository;
@@ -61,7 +62,7 @@ public class WeatherServiceImpl {
                         .queryParam("key", apiKey)
                         .queryParam("q", city)
                         .queryParam("days", days)
-                        .queryParam("aqi", "yes")
+                        .queryParam("aqi", "no")
                         .queryParam("alerts", "no")
                         .build())
                 .retrieve().bodyToMono(ForecastResponse.class);

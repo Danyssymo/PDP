@@ -37,11 +37,4 @@ public class WeatherController {
         System.out.println(res);
         return res;
     }
-
-    @GetMapping("/map")
-    public String testMapping(@RequestParam String city) {
-        ForecastResponse response = weatherService.getForecast(city, 7).block();
-        weatherService.save(response);
-        return "Проверка маппинга выполнена. Смотрите логи в консоли.";
-    }
 }

@@ -24,13 +24,13 @@ public class RegionCommand implements CommandHandler {
         List<List<InlineKeyboardButton>> rows = new ArrayList<>();
 
         List<InlineKeyboardButton> row1 = Arrays.asList(
-                createButton("🇷🇺 Россия", "country:RU"),
-                createButton("🇺🇸 США", "country:US")
+                createButton("🇷🇺 Москва", "country:Moscow"),
+                createButton("🇧🇾 Минск", "country:Minsk")
         );
 
         List<InlineKeyboardButton> row2 = Arrays.asList(
-                createButton("🇩🇪 Германия", "country:DE"),
-                createButton("🇨🇳 Китай", "country:CN")
+                createButton("🇱🇻 Рига", "country:Riga"),
+                createButton("🇱🇹 Вильнюс", "country:Vilnius")
         );
 
         rows.add(row1);
