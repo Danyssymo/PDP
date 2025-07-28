@@ -18,6 +18,6 @@ public class HighHeatStrategy implements DangerAnalysisStrategy {
 
     @Override
     public String getReason() {
-        return "Высокая температура > 32°C";
+        return MessageConstants.HIGH_HEAT_STRATEGY_MSG;
     }
 }

@@ -18,6 +18,6 @@ public class HighWindStrategy implements DangerAnalysisStrategy {
 
     @Override
     public String getReason() {
-        return "Сильный ветер > 70 km/h";
+        return MessageConstants.HIGH_WIND_STRATEGY_MSG;
     }
 }

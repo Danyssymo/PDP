@@ -18,6 +18,6 @@ public class ExtremeHeatStrategy implements DangerAnalysisStrategy{
 
     @Override
     public String getReason() {
-        return "Экстремальная жара > 38°C";
+        return MessageConstants.EXTREME_HEAT_STRATEGY_MSG ;
     }
 }

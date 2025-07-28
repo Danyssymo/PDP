@@ -18,6 +18,6 @@ public class ModerateWindStrategy implements DangerAnalysisStrategy {
 
     @Override
     public String getReason() {
-        return "Умеренно сильный ветер > 40 km/h";
+        return MessageConstants.MODERATE_WIND_STRATEGY_MSG;
     }
 }
