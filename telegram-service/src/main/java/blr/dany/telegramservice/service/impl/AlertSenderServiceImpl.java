@@ -19,13 +19,30 @@ public class AlertSenderServiceImpl implements AlertSenderService {
     private final MeteoGenieBot bot;
     private final UserServiceClient userServiceClient;
 
+
+
     @Override
     public void sendMessage(KafkaAlert alert) {
         List<TelegramUser> users = userServiceClient.getUsersBySubAndCountry(true, alert.getCity()).getBody();
         for (TelegramUser user : users) {
+            String message = String.format("""
+        ⚠️ <b>Погодное предупреждение</b>
+        
+        📍 Город: <b>%s</b>
+        📅 Дата: <b>%s</b>
+        
+        📝 Причина: <i>%s</i>
+        
+        Будьте осторожны и следите за прогнозом!
+        """,
+                    alert.getCity(),
+                    alert.getForecastDayResponse().getDate(),
+                    alert.getMessage()
+            );
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(user.getChatId());
-            sendMessage.setText("Вот ты и попался");
+            sendMessage.setParseMode("HTML");
+            sendMessage.setText(message);
             try {
                 bot.execute(sendMessage);
             } catch (TelegramApiException e) {

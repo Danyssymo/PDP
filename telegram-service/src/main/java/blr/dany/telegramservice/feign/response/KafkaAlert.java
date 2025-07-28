@@ -11,5 +11,6 @@ public class KafkaAlert {
 
     private ForecastDayResponse forecastDayResponse;
     private String city;
+    private String message;
 
 }

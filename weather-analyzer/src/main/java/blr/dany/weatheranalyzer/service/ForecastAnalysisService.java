@@ -1,6 +1,7 @@
 package blr.dany.weatheranalyzer.service;
 
 import blr.dany.weatheranalyzer.dto.request.KafkaAlert;
+import blr.dany.weatheranalyzer.dto.response.AnalyzeDay;
 import blr.dany.weatheranalyzer.dto.response.ForecastDayResponse;
 import blr.dany.weatheranalyzer.dto.response.ForecastResponse;
 import blr.dany.weatheranalyzer.dto.response.HourResponse;
@@ -19,38 +20,38 @@ public class ForecastAnalysisService {
 
     private final WeatherFeignClient weatherFeignClient;
     private final ForecastKafkaProducer forecastKafkaProducer;
+    private final List<DangerAnalysisStrategy> strategies;
 
-    private DangerLevel analyzeDay(ForecastDayResponse forecastDay) {
-        for (HourResponse hourly : forecastDay.getHour()) {
-            double windKph = hourly.getWindKph();
-            double tempC = hourly.getTempC();
-            double precipitationMm = hourly.getPrecipMm();
+    private AnalyzeDay analyzeDay(ForecastDayResponse forecastDay) {
 
-            if (windKph > 70 || tempC > 38 || tempC < -20) {
-                return DangerLevel.RED;
-            }
+        AnalyzeDay analyzeDay = new AnalyzeDay();
+        analyzeDay.setLevel(DangerLevel.GREEN);
 
-            if (windKph > 40 || tempC > 32 || tempC < -10 || precipitationMm > 10) {
-                return DangerLevel.YELLOW;
+        for (HourResponse hour : forecastDay.getHour()) {
+            for (DangerAnalysisStrategy strategy : strategies) {
+                if (strategy.matches(hour)) {
+                    analyzeDay.setLevel(strategy.getLevel());
+                    analyzeDay.setMessage(strategy.getReason());
+                    return analyzeDay;
+                }
             }
         }
-
-        return DangerLevel.GREEN;
+        return analyzeDay;
     }
 
-    public Map<String, DangerLevel> analyzeForecast(String cityName) {
+    public Map<String, AnalyzeDay> analyzeForecast(String cityName) {
         List<ForecastDayResponse> forecastResponse = weatherFeignClient.getNextDayForecast(cityName);
-        Map<String, DangerLevel> dangerByDate = new LinkedHashMap<>();
+        Map<String, AnalyzeDay> result = new LinkedHashMap<>();
 
         for (ForecastDayResponse day : forecastResponse) {
-            DangerLevel level = analyzeDay(day);
-            dangerByDate.put(day.getDate(), level);
-            if (level == DangerLevel.YELLOW){
-                KafkaAlert kafkaAlert = new KafkaAlert(day, cityName);
+            AnalyzeDay analyzed = analyzeDay(day);
+            result.put(day.getDate(), analyzed);
+            if (analyzed.getLevel() == DangerLevel.YELLOW) {
+                KafkaAlert kafkaAlert = new KafkaAlert(day, cityName, analyzed.getMessage());
                 forecastKafkaProducer.sendYellowAlert(kafkaAlert);
             }
         }
 
-        return dangerByDate;
+        return result;
     }
 }
