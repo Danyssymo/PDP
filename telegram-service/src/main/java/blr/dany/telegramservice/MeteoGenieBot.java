@@ -6,6 +6,7 @@ import blr.dany.telegramservice.commands.CommandHandler;
 import blr.dany.telegramservice.commands.HandleFactory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class MeteoGenieBot extends TelegramLongPollingBot {
 
     private final HandleFactory handlerFactory;
@@ -46,7 +48,7 @@ public class MeteoGenieBot extends TelegramLongPollingBot {
                         } catch (TelegramApiException e) {
                             throw new RuntimeException("Ошибка при отправке", e);
                         }
-                    }, () -> System.out.println("Нет хендлера для callback: " + callbackData));
+                    }, () -> log.info("Нет хендлера для callback: " + callbackData));
             return;
         }
 
@@ -65,6 +67,7 @@ public class MeteoGenieBot extends TelegramLongPollingBot {
                 try {
                         execute(message);
                 } catch (TelegramApiException e) {
+                    log.warn("Ошибка отправки сообщения");
                     throw new RuntimeException(e);
                 }
             }

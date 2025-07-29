@@ -6,6 +6,7 @@ import blr.dany.telegramservice.feign.response.KafkaAlert;
 import blr.dany.telegramservice.feign.response.TelegramUser;
 import blr.dany.telegramservice.service.AlertSenderService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AlertSenderServiceImpl implements AlertSenderService {
 
     private final MeteoGenieBot bot;
@@ -46,6 +48,7 @@ public class AlertSenderServiceImpl implements AlertSenderService {
             try {
                 bot.execute(sendMessage);
             } catch (TelegramApiException e) {
+                log.warn("Ошибка отправки алерта");
                 throw new RuntimeException(e);
             }
         }

@@ -17,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -33,13 +34,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class WeatherServiceImpl implements WeatherService {
 
     private final WebClient weatherWebClient;
     private final WeatherDayRepository weatherDayRepository;
     private final LocationRepository locationRepository;
-    private final HourlyForecastRepository hourlyForecastRepository;
-    private final WeatherConditionRepository weatherConditionRepository;
     private final LocationMapper locationMapper;
     private final ForecastDayMapper forecastDayMapper;
     private final HourlyForecastMapper hourlyForecastMapper;
@@ -72,6 +72,7 @@ public class WeatherServiceImpl implements WeatherService {
     public List<ForecastDayResponse> getNextDaysForecast(String name) {
         Optional<Location> locationOpt = locationRepository.findByName(name);
         if (locationOpt.isEmpty()) {
+            log.warn("Location not found");
             throw new EntityNotFoundException("Location not found");
         }
 

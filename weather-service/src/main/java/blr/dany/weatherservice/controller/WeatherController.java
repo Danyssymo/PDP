@@ -31,10 +31,9 @@ public class WeatherController {
         return weatherService.getForecast(city,7);
     }
 
-    @GetMapping("/forecast2")
-    public List<ForecastDayResponse> getForecast2(@RequestParam String city) {
+    @GetMapping("/forecast-schedule")
+    public List<ForecastDayResponse> getForecastSchedule(@RequestParam String city) {
         List<ForecastDayResponse> res = weatherService.getNextDaysForecast(city);
-        System.out.println(res);
         return res;
     }
 }

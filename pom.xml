@@ -21,7 +21,6 @@
 	<modules>
 		<module>weather-service</module>
 		<module>weather-analyzer</module>
-		<module>notification-service</module>
 		<module>user-service</module>
 		<module>telegram-service</module>
 	</modules>

@@ -18,13 +18,10 @@ public class WeatherCondition {
     @Id
     @Column(name = "code")
     private Integer code;
-
     @Column(name = "daytime_icon", length = 255)
     private String daytimeIcon;
-
     @Column(name = "nighttime_icon", length = 255)
     private String nighttimeIcon;
-
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 }

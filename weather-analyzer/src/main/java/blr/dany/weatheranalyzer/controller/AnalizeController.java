@@ -1,6 +1,6 @@
 package blr.dany.weatheranalyzer.controller;
 
-import blr.dany.weatheranalyzer.service.ForecastAnalysisService;
+import blr.dany.weatheranalyzer.service.impl.ForecastAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +14,9 @@ public class AnalizeController {
 
     private final ForecastAnalysisService forecastAnalysisService;
 
-    @GetMapping("/test")
+    @GetMapping
     public void test(){
-        System.out.println(forecastAnalysisService.analyzeForecast("Minsk"));
+        forecastAnalysisService.analyzeForecast("Minsk");
     }
+    // ручка для анализа в обход шедулера
 }

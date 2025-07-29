@@ -11,7 +11,7 @@ import java.util.List;
 @FeignClient(name = "weather-service", url = "${weather.service.url}")
 public interface WeatherFeignClient {
 
-    @GetMapping("/api/v1/weather/forecast2")
-    List<ForecastDayResponse> getNextDayForecast(@RequestParam String city);
+    @GetMapping("/api/v1/weather/forecast-schedule")
+    List<ForecastDayResponse> getForecastSchedule(@RequestParam String city);
 }
 

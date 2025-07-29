@@ -63,7 +63,7 @@ public class CurrentWeatherCommand implements CommandHandler {
                 .append(" км*\n");
 
         message.setText(weatherText.toString());
-        message.setParseMode("Markdown"); // Для форматирования текста
+        message.setParseMode("Markdown");
         return message;
     }
 }

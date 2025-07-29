@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-db
+  namespace: pdp
+spec:
+  template:
+    spec:
+      containers:
+        - name: init-db
+          image: postgres:15
+          env:
+            - name: PGPASSWORD
+              value: postgres
+          command: ["sh", "-c"]
+          args:
+            - psql -h postgres -U postgres -d pdp_db -f /init/init.sql
+          volumeMounts:
+            - name: init-sql
+              mountPath: /init
+      restartPolicy: Never
+      volumes:
+        - name: init-sql
+          configMap:
+            name: init-db-sql

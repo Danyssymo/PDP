@@ -64,7 +64,7 @@ public interface ForecastDayMapper {
     List<ForecastDayResponse> toDtos(List<ForecastDay> dtos);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "location", ignore = true) // Не трогаем
+    @Mapping(target = "location", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "hourlyForecasts", source = "hour")
@@ -90,7 +90,7 @@ public interface ForecastDayMapper {
     void updateFromDto(ForecastDayResponse dto, @MappingTarget ForecastDay entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "location", ignore = true) // Будем устанавливать отдельно
+    @Mapping(target = "location", ignore = true)
     @Mapping(target = "hourlyForecasts", source = "hour")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -123,7 +123,6 @@ public interface ForecastDayMapper {
         }
 
         try {
-            // Формат времени в астрономических данных: "05:11 AM"
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
             return LocalTime.parse(time, formatter);
         } catch (DateTimeParseException e) {
